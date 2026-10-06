@@ -26,16 +26,26 @@
           <DataTemplate x:DataType="vm:ApplicationRowViewModel">
             <Border Padding="12" Margin="0,0,0,8" CornerRadius="10" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
               <StackPanel Spacing="6">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                  <TextBlock Grid.Column="1" Text="{Binding VolumeLabel}" Margin="8,0,0,0" />
+                <Grid ColumnDefinitions="28,*,Auto">
+                  <controls:ApplicationIcon Reference="{Binding Icon}" Fallback="{Binding IconFallback}"
+                                            Width="24" Height="24" />
+                  <TextBlock Grid.Column="1" Text="{Binding DisplayName}" Margin="8,0,0,0"
+                             VerticalAlignment="Center" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                             ToolTip.Tip="{Binding DisplayName}" />
+                  <TextBlock Grid.Column="2" Text="{Binding VolumeLabel}" Margin="8,0,0,0" VerticalAlignment="Center" />
                 </Grid>
                 <controls:ApplicationVolumeSlider Minimum="0" Maximum="100" Value="{Binding Volume, Mode=TwoWay}"
                         IsEnabled="{Binding CanControl}" Name="VolumeSlider"
-                        AutomationProperties.Name="{Binding VolumeControlLabel}" />
-                <Button Content="{Binding MuteLabel}" Command="{Binding ToggleMuteCommand}"
+                        AutomationProperties.Name="{Binding VolumeControlLabel}"
+                        AutomationProperties.HelpText="{Binding VolumeDescription}"
+                        ToolTip.Tip="{Binding VolumeDescription}" />
+                <Grid ColumnDefinitions="Auto,*">
+                  <Button Content="{Binding MuteLabel}" Command="{Binding ToggleMuteCommand}"
                         IsEnabled="{Binding CanControl}" HorizontalAlignment="Left"
                         AutomationProperties.Name="{Binding MuteControlLabel}" />
+                  <TextBlock Grid.Column="1" Text="{Binding ActivityLabel}" HorizontalAlignment="Right"
+                             VerticalAlignment="Center" FontSize="12" Opacity="0.7" />
+                </Grid>
                 <TextBlock Text="{Binding CommandError}" IsVisible="{Binding HasCommandError}"
                            TextWrapping="Wrap" FontSize="12" />
               </StackPanel>

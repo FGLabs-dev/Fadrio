@@ -89,7 +89,9 @@ dotnet run --project src/Fadrio.Cli -- profile clear xdg:firefox
 
 The override appears in subsequent `apps` output while the canonical ID remains unchanged.
 
-Launch the in-development mixer with `dotnet run --project src/Fadrio.UI`. Its application rows reflect the live PipeWire snapshot and use the same application-wide volume/mute command path as the CLI. Output-device controls, icons, tray behavior, and UI polish remain on the roadmap.
+Launch the in-development mixer with `dotnet run --project src/Fadrio.UI`. Its application rows reflect the live PipeWire snapshot and use the same application-wide volume/mute command path as the CLI. Application rows load validated local PNG icons asynchronously, fall back to an initial when artwork is missing or invalid, and show playback/mute state. Mixed-volume controls explain that an adjustment sets every owned stream to the same level. Output-device controls, tray behavior, and UI polish remain on the roadmap.
+
+[See the current application-row screenshot](docs/screenshots/fad-0502-application-icon.png), captured with an isolated silent fixture and the normal host fonts.
 
 [See the first live-row screenshot](docs/screenshots/fad-0501-live-fixture.png), captured with a controlled, silent PipeWire fixture rather than a user's applications.
 

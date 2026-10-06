@@ -122,6 +122,8 @@ public sealed class ApplicationRowViewModel : INotifyPropertyChanged
     private readonly Func<ApplicationId, float, ValueTask> _setVolume;
     private readonly Func<ApplicationId, bool, ValueTask> _setMute;
     private string _displayName = string.Empty;
+    private IconReference? _icon;
+    private bool _isAudible;
     private double _volume;
     private bool _isMuted;
     private bool _isMixedVolume;
@@ -162,6 +164,7 @@ public sealed class ApplicationRowViewModel : INotifyPropertyChanged
             {
                 OnPropertyChanged(nameof(VolumeControlLabel));
                 OnPropertyChanged(nameof(MuteControlLabel));
+                OnPropertyChanged(nameof(IconFallback));
             }
         }
     }
@@ -186,6 +189,18 @@ public sealed class ApplicationRowViewModel : INotifyPropertyChanged
         }
     }
     public string VolumeLabel => IsMixedVolume ? $"{Volume:0}% mixed" : $"{Volume:0}%";
+    public IconReference? Icon { get => _icon; private set => SetField(ref _icon, value); }
+    public string IconFallback => string.IsNullOrWhiteSpace(DisplayName)
+        ? "?" : System.Globalization.StringInfo.GetNextTextElement(DisplayName.Trim()).ToUpperInvariant();
+    public bool IsAudible
+    {
+        get => _isAudible;
+        private set { if (SetField(ref _isAudible, value)) OnPropertyChanged(nameof(ActivityLabel)); }
+    }
+    public string ActivityLabel => IsMuted ? "Muted" : IsAudible ? "Playing" : "Idle";
+    public string VolumeDescription => IsMixedVolume
+        ? "Streams have different levels. Moving this slider sets every stream to the same level."
+        : "Controls every playback stream belonging to this application.";
     public bool IsMuted
     {
         get => _isMuted;
@@ -195,10 +210,22 @@ public sealed class ApplicationRowViewModel : INotifyPropertyChanged
             {
                 OnPropertyChanged(nameof(MuteLabel));
                 OnPropertyChanged(nameof(MuteControlLabel));
+                OnPropertyChanged(nameof(ActivityLabel));
             }
         }
     }
-    public bool IsMixedVolume { get => _isMixedVolume; private set { if (SetField(ref _isMixedVolume, value)) OnPropertyChanged(nameof(VolumeLabel)); } }
+    public bool IsMixedVolume
+    {
+        get => _isMixedVolume;
+        private set
+        {
+            if (SetField(ref _isMixedVolume, value))
+            {
+                OnPropertyChanged(nameof(VolumeLabel));
+                OnPropertyChanged(nameof(VolumeDescription));
+            }
+        }
+    }
     public bool CanControl
     {
         get => _canControl;
@@ -233,6 +260,8 @@ public sealed class ApplicationRowViewModel : INotifyPropertyChanged
         try
         {
             DisplayName = application.Identity.DisplayName;
+            Icon = application.Identity.Icon;
+            IsAudible = application.IsAudible;
             if (!IsInteracting && !_sendingVolume && !_preserveVolumeOnNextUpdate)
             {
                 Volume = application.EffectiveVolume * 100;
