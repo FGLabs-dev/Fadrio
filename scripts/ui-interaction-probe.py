@@ -37,6 +37,18 @@ x.XStringToKeysym.restype = c.c_ulong
 x.XKeysymToKeycode.argtypes = [c.c_void_p, c.c_ulong]
 x.XKeysymToKeycode.restype = c.c_uint
 x.XQueryPointer.argtypes = [c.c_void_p, c.c_ulong, c.POINTER(c.c_ulong), c.POINTER(c.c_ulong), c.POINTER(c.c_int), c.POINTER(c.c_int), c.POINTER(c.c_int), c.POINTER(c.c_int), c.POINTER(c.c_uint)]
+x.XInternAtom.argtypes = [c.c_void_p, c.c_char_p, c.c_int]
+x.XInternAtom.restype = c.c_ulong
+
+class ClientMessage(c.Structure):
+    _fields_ = [('type', c.c_int), ('serial', c.c_ulong), ('send_event', c.c_int),
+               ('display', c.c_void_p), ('window', c.c_ulong),
+               ('message_type', c.c_ulong), ('format', c.c_int), ('data', c.c_long * 5)]
+
+class Event(c.Union):
+    _fields_ = [('message', ClientMessage), ('padding', c.c_long * 24)]
+
+x.XSendEvent.argtypes = [c.c_void_p, c.c_ulong, c.c_int, c.c_long, c.POINTER(Event)]
 t.XTestFakeMotionEvent.argtypes = [c.c_void_p, c.c_int, c.c_int, c.c_int, c.c_ulong]
 t.XTestFakeButtonEvent.argtypes = [c.c_void_p, c.c_uint, c.c_int, c.c_ulong]
 t.XTestFakeKeyEvent.argtypes = [c.c_void_p, c.c_uint, c.c_int, c.c_ulong]
@@ -68,6 +80,24 @@ def key(name):
     x.XFlush(d)
     time.sleep(.08)
 
+def activate():
+    # Ask the window manager to activate the owned window. Merely assigning
+    # X input focus can leave GNOME's active-window state on the prior app.
+    event = Event()
+    event.message.type = 33  # ClientMessage
+    event.message.display = d
+    event.message.window = window
+    event.message.message_type = x.XInternAtom(d, b'_NET_ACTIVE_WINDOW', 0)
+    event.message.format = 32
+    event.message.data[0] = 2  # pager/test activation request
+    x.XSendEvent(d, root, 0, (1 << 20) | (1 << 19), c.byref(event))
+    x.XFlush(d)
+    time.sleep(.3)
+    focus = c.c_ulong()
+    focus_revert = c.c_int()
+    x.XGetInputFocus(d, c.byref(focus), c.byref(focus_revert))
+    assert focus.value == window, f'Owned window did not receive keyboard focus: {focus.value:#x}'
+
 def state():
     output = subprocess.check_output(['dotnet', root_path + '/src/Fadrio.Cli/bin/Debug/net10.0/fadrioctl.dll', 'apps'], text=True)
     assert 'Application: Fadrio Fixture' in output, output
@@ -84,9 +114,7 @@ def wait_state(predicate):
     return observed
 
 try:
-    x.XRaiseWindow(d, window)
-    x.XSetInputFocus(d, window, 2, 0)
-    x.XFlush(d)
+    activate()
     time.sleep(.5)
     x.XTranslateCoordinates(d, window, root, 0, 0, c.byref(origin_x), c.byref(origin_y), c.byref(child))
     if len(sys.argv) > 3:
@@ -108,9 +136,12 @@ try:
     volume, muted = wait_state(lambda observed: 35 <= observed[0] <= 45)
     print('Rendered slider drag reached', volume, 'percent', flush=True)
     # Reassert focus after the separate CLI probe; the desktop may redirect it.
-    x.XSetInputFocus(d, window, 2, 0)
-    x.XFlush(d)
-    time.sleep(.15)
+    activate()
+    # A recreated row has a new control; focus that slider explicitly before
+    # testing its keys, rather than relying on desktop activation history.
+    move(146, slider_y)
+    button(1)
+    button(0)
     key('Home')
     for _ in range(10): key('Right')
     volume, muted = wait_state(lambda observed: observed[0] == 10)
