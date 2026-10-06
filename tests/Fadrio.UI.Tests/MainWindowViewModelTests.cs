@@ -295,6 +295,74 @@ public sealed class MainWindowViewModelTests
 
     private static MixerSnapshot Snapshot(params RuntimeApplication[] apps) => new(apps, 1);
 
+    [Fact]
+    public void IconOverridesRefreshTheExistingRowAndMissingIconsHaveTextFallback()
+    {
+        var viewModel = new MainWindowViewModel();
+        RuntimeApplication app = App("xdg:firefox", "Firefox", 0.5f);
+        viewModel.ApplySnapshot(Snapshot(new RuntimeApplication(
+            app.Identity with { Icon = new("firefox") }, app.Sessions)));
+        ApplicationRowViewModel row = Assert.Single(viewModel.Applications);
+        Assert.Equal(new IconReference("firefox"), row.Icon);
+        Assert.Equal("F", row.IconFallback);
+        var notifications = new List<string?>();
+        row.PropertyChanged += (_, args) => notifications.Add(args.PropertyName);
+
+        viewModel.ApplySnapshot(Snapshot(App("xdg:firefox", "  Browser", 0.5f)));
+
+        Assert.Same(row, Assert.Single(viewModel.Applications));
+        Assert.Null(row.Icon);
+        Assert.Equal("B", row.IconFallback);
+        Assert.Contains(nameof(row.Icon), notifications);
+        Assert.Contains(nameof(row.IconFallback), notifications);
+    }
+
+    [Theory]
+    [InlineData("", "?")]
+    [InlineData("  ", "?")]
+    [InlineData("🎵 Music", "🎵")]
+    [InlineData("e\u0301cho", "E\u0301")]
+    public void FallbackPreservesUnicodeTextElements(string name, string expected)
+    {
+        var viewModel = new MainWindowViewModel();
+        viewModel.ApplySnapshot(Snapshot(App("xdg:example", name, 0.5f)));
+        Assert.Equal(expected, Assert.Single(viewModel.Applications).IconFallback);
+    }
+
+    [Fact]
+    public void ActivityTracksBackendStateAndMuteWithoutClaimingMeasuredAudioLevels()
+    {
+        var viewModel = new MainWindowViewModel();
+        viewModel.SetBackendAvailable(true);
+        RuntimeApplication app = App("xdg:music", "Music", 0.5f);
+        viewModel.ApplySnapshot(Snapshot(app));
+        ApplicationRowViewModel row = Assert.Single(viewModel.Applications);
+        Assert.Equal("Idle", row.ActivityLabel);
+
+        viewModel.ApplySnapshot(Snapshot(new RuntimeApplication(app.Identity,
+            app.Sessions.Select(session => session with { Active = true }))));
+        Assert.Equal("Playing", row.ActivityLabel);
+        row.ToggleMuteCommand.Execute(null);
+        Assert.Equal("Muted", row.ActivityLabel);
+
+        viewModel.ApplySnapshot(Snapshot(new RuntimeApplication(app.Identity,
+            app.Sessions.Select(session => session with { Active = true, Volume = 0 }))));
+        Assert.Equal("Idle", row.ActivityLabel);
+    }
+
+    [Fact]
+    public void MixedVolumeHelpExplainsAbsoluteFanOutAndClearsAfterUserAdjustment()
+    {
+        var viewModel = new MainWindowViewModel();
+        viewModel.SetBackendAvailable(true);
+        viewModel.ApplySnapshot(Snapshot(App("xdg:browser", "Browser", 0.2f, 0.8f)));
+        ApplicationRowViewModel row = Assert.Single(viewModel.Applications);
+        Assert.Contains("different levels", row.VolumeDescription, StringComparison.Ordinal);
+        row.Volume = 40;
+        Assert.Equal("40%", row.VolumeLabel);
+        Assert.DoesNotContain("different levels", row.VolumeDescription, StringComparison.Ordinal);
+    }
+
     private static RuntimeApplication App(string id, string name, params float[] volumes) => new(
         new ApplicationIdentity { Id = new(id), DisplayName = name },
         volumes.Select((volume, index) => new AudioSession

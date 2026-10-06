@@ -33,12 +33,12 @@ After a normal local build, close other Fadrio windows and run:
 ./scripts/test-ui-interactions.sh
 ```
 
-This optional developer harness requires an X11/XWayland display, DejaVu fonts, X11/XTest libraries, `xwininfo`, `xprop`, `ffmpeg`, PipeWire tools, Python and .NET. It injects mouse/keyboard events into the exact Fadrio window whose process ownership it verifies. Do not interact with the desktop while it runs. It restores the prior pointer/focus and terminates only its owned processes. Its private runtime/data/cache directory is retained with logs and screenshots; the path is printed at exit. It is not part of headless CI or the supported-desktop matrix.
+This optional developer harness requires an X11/XWayland display, DejaVu fonts, X11/XTest libraries, `xwininfo`, `xprop`, `ffmpeg`, PipeWire tools, Python with Pillow and .NET. It injects mouse/keyboard events into the exact Fadrio window whose process ownership it verifies. Do not interact with the desktop while it runs. It restores the prior pointer/focus and terminates only its owned processes. Its private runtime/data/cache directory is retained with logs and screenshots; the path is printed at exit. It is not part of headless CI or the supported-desktop matrix.
 
-The fixture intentionally sets a process-local minimal Fontconfig configuration. It does not change host fonts or ship a restricted-font workaround in the app.
+The harness now defaults to the inherited host Fontconfig configuration. Set `FADRIO_UI_FONT_MODE=fixture` explicitly for the process-local minimal font fixture. It never changes host fonts. Current evidence is in [qualifying-application-rows.md](qualifying-application-rows.md).
 
 ## Open qualification limits
 
-- `BUG-00004`: normal launch with this host's full Fontconfig configuration stalled before `App.Initialize`, consuming a CPU core. The startup trace showed font/cache enumeration. A restricted process-local DejaVu configuration allowed the window to open; a software-rendering attempt did not resolve normal startup. This isolates a useful investigation path, not a proven upstream cause or a production fix. Default host-font startup is unqualified.
+- Historical `BUG-00004` observation (2026-09-27): normal launch with this host's full Fontconfig configuration stalled before `App.Initialize`, consuming a CPU core. The startup trace showed font/cache enumeration. A restricted process-local DejaVu configuration allowed the window to open; a software-rendering attempt did not resolve normal startup. This isolates a useful investigation path, not a proven upstream cause or a production fix. Default host-font startup is unqualified.
 - The checks above are XWayland, not native Wayland, KDE, screen-reader, fractional-scaling, packaged installation or long-running qualification. Those gates remain open.
 - Output control, icons, persistence of pinned/inactive rows, tray integration and localization are still later roadmap work. No new release is justified by this slice alone.

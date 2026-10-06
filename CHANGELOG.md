@@ -6,6 +6,8 @@ All notable changes will be documented here. The format follows [Keep a Changelo
 
 ### Added
 
+- `FAD-0502` Application-row slice: asynchronous validated local PNG icons with text fallback, playing/idle/muted state, and accessible mixed-volume help. Output-device controls remain pending.
+
 - `FAD-0202` Secure local PNG icon resolution with trusted XDG roots, bounded caching, and traversal, symlink, malformed-file, and size protections.
 - `FAD-0203` Flatpak-first canonical identity from bounded sandbox metadata and exported host desktop entries.
 - `FAD-0204` Optional Snap identity from corroborated wrapper metadata without invoking or depending on Snap tooling.
