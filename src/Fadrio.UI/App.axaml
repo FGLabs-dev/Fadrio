@@ -2,6 +2,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Fadrio.UI.App"
              RequestedThemeVariant="Default">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+          <Color x:Key="MixerThumbColor">#CFDAE8</Color>
+          <SolidColorBrush x:Key="MixerBackground" Color="#141820" />
+          <SolidColorBrush x:Key="MixerSurface" Color="#202631" />
+          <SolidColorBrush x:Key="MixerInset" Color="#171D26" />
+          <SolidColorBrush x:Key="MixerStroke" Color="#35404F" />
+          <SolidColorBrush x:Key="MixerText" Color="#F0F3F8" />
+          <SolidColorBrush x:Key="MixerSecondaryText" Color="#ABB7C8" />
+          <SolidColorBrush x:Key="MixerAccent" Color="#59C6AE" />
+          <SolidColorBrush x:Key="MixerAccentText" Color="#141820" />
+          <SolidColorBrush x:Key="MixerThumb" Color="#CFDAE8" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+          <Color x:Key="MixerThumbColor">#35495D</Color>
+          <SolidColorBrush x:Key="MixerBackground" Color="#ECEFF3" />
+          <SolidColorBrush x:Key="MixerSurface" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="MixerInset" Color="#F1F4F7" />
+          <SolidColorBrush x:Key="MixerStroke" Color="#C9D1DB" />
+          <SolidColorBrush x:Key="MixerText" Color="#202936" />
+          <SolidColorBrush x:Key="MixerSecondaryText" Color="#536174" />
+          <SolidColorBrush x:Key="MixerAccent" Color="#187E6B" />
+          <SolidColorBrush x:Key="MixerAccentText" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="MixerThumb" Color="#35495D" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
   <Application.Styles>
     <FluentTheme />
   </Application.Styles>

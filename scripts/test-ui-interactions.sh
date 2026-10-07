@@ -62,11 +62,11 @@ printf 'window_ready_seconds=%s\n' "$((SECONDS - fadrio_fixture_started))" >>"$f
 xprop -id "$fadrio_fixture_window" _NET_WM_PID | rg -F "= $fadrio_fixture_ui_pid" >/dev/null
 sleep 1
 ffmpeg -hide_banner -loglevel error -f x11grab -window_id "$fadrio_fixture_window" \
-    -video_size 360x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/before.png"
+    -video_size 940x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/before.png"
 export FADRIO_UI_REFERENCE_CAPTURE="$fadrio_fixture_dir/before.png"
 python3 "$repository_root/scripts/ui-interaction-probe.py" "$fadrio_fixture_window" "$PWD"
 ffmpeg -hide_banner -loglevel error -f x11grab -window_id "$fadrio_fixture_window" \
-    -video_size 360x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/mixer.png"
+    -video_size 940x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/mixer.png"
 kill -0 "$fadrio_fixture_ui_pid"
 kill "$fadrio_fixture_stream_pid"
 wait "$fadrio_fixture_stream_pid" 2>/dev/null || true
@@ -80,7 +80,7 @@ fadrio_fixture_stream_pid=$!
 sleep 2
 python3 "$repository_root/scripts/ui-interaction-probe.py" "$fadrio_fixture_window" "$PWD"
 ffmpeg -hide_banner -loglevel error -f x11grab -window_id "$fadrio_fixture_window" \
-    -video_size 360x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/broken-icon.png"
+    -video_size 940x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/broken-icon.png"
 kill -0 "$fadrio_fixture_ui_pid"
 python3 "$repository_root/scripts/ui-interaction-probe.py" "$fadrio_fixture_window" "$PWD" "$fadrio_fixture_pipewire_pid"
 wait "$fadrio_fixture_pipewire_pid" 2>/dev/null || true
@@ -89,7 +89,7 @@ wait "$fadrio_fixture_stream_pid" 2>/dev/null || true
 fadrio_fixture_stream_pid=""
 sleep 1
 ffmpeg -hide_banner -loglevel error -f x11grab -window_id "$fadrio_fixture_window" \
-    -video_size 360x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/reconnecting.png"
+    -video_size 940x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/reconnecting.png"
 pipewire -c "$PWD/tests/fixtures/pipewire/fadrio-test.conf" >>"$fadrio_fixture_dir/pipewire.log" 2>&1 &
 fadrio_fixture_pipewire_pid=$!
 for _ in {1..100}; do
@@ -98,15 +98,15 @@ for _ in {1..100}; do
 done
 sleep 3
 ffmpeg -hide_banner -loglevel error -f x11grab -window_id "$fadrio_fixture_window" \
-    -video_size 360x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/empty.png"
+    -video_size 940x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/empty.png"
 pw-cat --playback --target 0 --rate 48000 --channels 2 --format s16 \
     -P '{ application.name = "Fadrio Fixture" application.id = "dev.fglabs.Fadrio.UiFixture" application.icon-name = "fadrio-fixture" }' \
     - </dev/zero >>"$fadrio_fixture_dir/stream.log" 2>&1 &
 fadrio_fixture_stream_pid=$!
 sleep 2
 ffmpeg -hide_banner -loglevel error -f x11grab -window_id "$fadrio_fixture_window" \
-    -video_size 360x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/recovered-before.png"
+    -video_size 940x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/recovered-before.png"
 python3 "$repository_root/scripts/ui-interaction-probe.py" "$fadrio_fixture_window" "$PWD"
 ffmpeg -hide_banner -loglevel error -f x11grab -window_id "$fadrio_fixture_window" \
-    -video_size 360x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/recovered.png"
+    -video_size 940x680 -i "$DISPLAY" -frames:v 1 "$fadrio_fixture_dir/recovered.png"
 kill -0 "$fadrio_fixture_ui_pid"

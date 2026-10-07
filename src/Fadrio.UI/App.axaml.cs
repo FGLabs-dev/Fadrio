@@ -18,7 +18,8 @@ public sealed partial class App : Avalonia.Application
             MixerUiSession? session = null;
             var viewModel = new MainWindowViewModel(
                 (id, volume) => session!.SetVolumeAsync(id, volume),
-                (id, muted) => session!.SetMuteAsync(id, muted));
+                (id, muted) => session!.SetMuteAsync(id, muted),
+                preference => ThemePreferenceService.Apply(this, preference));
             session = new MixerUiSession(viewModel, database);
             var window = new MainWindow
             {

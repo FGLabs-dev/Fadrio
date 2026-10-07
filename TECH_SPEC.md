@@ -1687,6 +1687,8 @@ Do not open to a dashboard.
 
 # 34. Main Mixer UI
 
+> Active layout update (2026-10-07): the user selected a Voicemeeter-inspired application console. [ADR-0003](docs/decisions/ADR-0003-application-console-layout.md) supersedes the initial narrow-window geometry and horizontal row sliders below: default 940 x 680, horizontally arranged logical-application strips, vertical 0–100% faders, and scrolling at narrow widths. Application identity, command semantics and product scope are unchanged. The initial layout remains below as design history.
+
 ## 34.1 Window form
 
 Default approximate size at 100% scale:

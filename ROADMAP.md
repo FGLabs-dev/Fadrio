@@ -182,9 +182,9 @@ Canonical ticket format:
 - [x] `FAD-0501` `P0` Connect immutable mixer snapshots and commands to the Avalonia view models.
 - [ ] `FAD-0502` `P1` Build accessible output and logical-application rows with mixed-volume state.
   - Status: In progress
-  - Scope: Validated asynchronous local application icons, readable fallback/activity states, and mixed-volume help are the current application-row slice. Output-device rows remain pending.
+  - Scope: Application console with vertical percentage faders, session themes, logical counts, validated asynchronous local icons, readable fallback/activity states, and mixed-volume help. Output-device rows remain pending.
   - Acceptance: Accessible logical-application and output rows, verified mixed-volume behavior, local icon fallback, and rendered keyboard/mouse checks.
-  - Evidence: `docs/development/qualifying-application-rows.md`; this slice does not complete output control or REL-00006.
+  - Evidence: `docs/development/qualifying-application-rows.md` and `docs/development/qualifying-console-ui.md`; this slice does not complete output control or REL-00006.
 - [x] `FAD-0503` `P1` Add stable sorting, interaction freeze, empty, unavailable, and reconnect states.
   - Scope: Deterministic active-row ordering and pointer/keyboard interaction freeze; connected-empty versus unavailable states and reconnect-safe commands. Persistent pinned/inactive rows remain FAD-0303.
   - Acceptance: Rows are reused, structural changes wait until gesture end, removed targets disable immediately, queued commands are discarded on disconnect, and rendered controls recover after an isolated daemon restart.
