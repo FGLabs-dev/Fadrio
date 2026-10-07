@@ -35,7 +35,7 @@ Fadrio resolves PipeWire playback nodes into stable logical applications and gro
 - Stable fallback identities that never use PID.
 - Multi-session application grouping and application-wide volume/mute commands.
 - Managed reconnect supervision with generation isolation.
-- Diagnostic CLI, SQLite-backed identity overrides, and the first live Avalonia application rows with volume and mute controls.
+- Diagnostic CLI, SQLite-backed identity overrides, and a live Avalonia application console with vertical volume faders, mute controls, and session-scoped themes.
 
 ## Architecture
 
@@ -91,7 +91,11 @@ The override appears in subsequent `apps` output while the canonical ID remains 
 
 Launch the in-development mixer with `dotnet run --project src/Fadrio.UI`. Its application rows reflect the live PipeWire snapshot and use the same application-wide volume/mute command path as the CLI. Application rows load validated local PNG icons asynchronously, fall back to an initial when artwork is missing or invalid, and show playback/mute state. Mixed-volume controls explain that an adjustment sets every owned stream to the same level. Output-device controls, tray behavior, and UI polish remain on the roadmap.
 
-[See the current application-row screenshot](docs/screenshots/fad-0502-application-icon.png), captured with an isolated silent fixture and the normal host fonts.
+The current console uses vertical percentage faders and a horizontally scrollable bank of logical applications. Choose System, Light or Dark for the current session.
+
+![Current application console](docs/screenshots/fad-0502-console-dark.png)
+
+This actual 940 × 680 capture uses four controlled silent applications and five streams on a private PipeWire daemon, with normal host fonts. [Light theme](docs/screenshots/fad-0502-console-light.png), [narrow layout](docs/screenshots/fad-0502-console-narrow.png), and [qualification evidence](docs/development/qualifying-console-ui.md) are available. Reproduce with `./scripts/capture-console.sh` after building.
 
 [See the first live-row screenshot](docs/screenshots/fad-0501-live-fixture.png), captured with a controlled, silent PipeWire fixture rather than a user's applications.
 

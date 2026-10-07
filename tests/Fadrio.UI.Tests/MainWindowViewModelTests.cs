@@ -7,6 +7,43 @@ namespace Fadrio.UI.Tests;
 public sealed class MainWindowViewModelTests
 {
     [Fact]
+    public void ThemeSelectionAppliesOnlyChangedValidPreferencesWithoutSendingAudioCommands()
+    {
+        var applied = new List<ThemePreference>();
+        int audioCommands = 0;
+        var viewModel = new MainWindowViewModel(
+            (_, _) => { audioCommands++; return ValueTask.CompletedTask; },
+            (_, _) => { audioCommands++; return ValueTask.CompletedTask; }, applied.Add);
+        Assert.Equal(ThemePreference.System, viewModel.SelectedTheme);
+        viewModel.SelectedTheme = ThemePreference.Light;
+        viewModel.SelectedTheme = ThemePreference.Light;
+        viewModel.SelectedTheme = (ThemePreference)100;
+        viewModel.SelectedTheme = ThemePreference.Dark;
+        viewModel.SelectedTheme = ThemePreference.System;
+        Assert.Equal([ThemePreference.Light, ThemePreference.Dark, ThemePreference.System], applied);
+        Assert.Equal(0, audioCommands);
+    }
+
+    [Fact]
+    public void ConsoleCountTracksDisplayedLogicalApplicationsAndWaitsForGestureEnd()
+    {
+        var viewModel = new MainWindowViewModel();
+        viewModel.SetBackendAvailable(true);
+        Assert.Equal("0 applications", viewModel.ApplicationCountLabel);
+        viewModel.ApplySnapshot(Snapshot(App("xdg:browser", "Browser", 0.2f, 0.8f)));
+        Assert.Equal("1 application", viewModel.ApplicationCountLabel);
+        ApplicationRowViewModel row = Assert.Single(viewModel.Applications);
+        row.BeginInteraction();
+        viewModel.ApplySnapshot(Snapshot(App("xdg:browser", "Browser", 0.2f, 0.8f), App("xdg:music", "Music", 0.5f)));
+        Assert.Equal("1 application", viewModel.ApplicationCountLabel);
+        row.EndInteraction();
+        Assert.Equal("2 applications", viewModel.ApplicationCountLabel);
+        viewModel.SetBackendAvailable(false);
+        viewModel.ApplySnapshot(MixerSnapshot.Empty);
+        Assert.Equal("0 applications", viewModel.ApplicationCountLabel);
+    }
+
+    [Fact]
     public void EmptyShellDoesNotPretendToHaveAnOutputDevice()
     {
         var viewModel = new MainWindowViewModel();

@@ -6,53 +6,105 @@
         x:DataType="vm:MainWindowViewModel"
         Title="{Binding Title}"
         Icon="avares://fadrio/Assets/fadrio-app-icon.png"
-        Width="360"
-        Height="680"
-        MinWidth="320"
-        MinHeight="400"
+        Width="940" Height="680" MinWidth="420" MinHeight="420"
+        Background="{DynamicResource MixerBackground}"
+        Foreground="{DynamicResource MixerText}"
         WindowStartupLocation="CenterScreen">
-  <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel Margin="24" Spacing="12">
-      <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="SemiBold" />
-      <TextBlock Text="{Binding Status}" FontSize="12" Opacity="0.7" />
-      <Separator />
-      <TextBlock Text="{Binding OutputHeading}" FontSize="12" FontWeight="SemiBold" />
-      <TextBlock Text="{Binding EmptyOutputMessage}" Opacity="0.7" />
-      <Separator Margin="0,8" />
-      <TextBlock Text="{Binding ApplicationsHeading}" FontSize="12" FontWeight="SemiBold" />
-      <TextBlock Text="{Binding EmptyApplicationsMessage}" IsVisible="{Binding HasNoApplications}" TextWrapping="Wrap" Opacity="0.7" />
-      <ItemsControl ItemsSource="{Binding Applications}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="vm:ApplicationRowViewModel">
-            <Border Padding="12" Margin="0,0,0,8" CornerRadius="10" Background="{DynamicResource SystemControlBackgroundBaseLowBrush}">
-              <StackPanel Spacing="6">
-                <Grid ColumnDefinitions="28,*,Auto">
-                  <controls:ApplicationIcon Reference="{Binding Icon}" Fallback="{Binding IconFallback}"
-                                            Width="24" Height="24" />
-                  <TextBlock Grid.Column="1" Text="{Binding DisplayName}" Margin="8,0,0,0"
-                             VerticalAlignment="Center" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
-                             ToolTip.Tip="{Binding DisplayName}" />
-                  <TextBlock Grid.Column="2" Text="{Binding VolumeLabel}" Margin="8,0,0,0" VerticalAlignment="Center" />
+  <Window.Resources>
+    <x:Double x:Key="SliderVerticalThumbWidth">36</x:Double>
+    <x:Double x:Key="SliderVerticalThumbHeight">16</x:Double>
+    <CornerRadius x:Key="SliderThumbCornerRadius">3</CornerRadius>
+    <SolidColorBrush x:Key="SliderThumbBackground" Color="{DynamicResource MixerThumbColor}" />
+    <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="{DynamicResource MixerThumbColor}" />
+    <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="{DynamicResource MixerThumbColor}" />
+  </Window.Resources>
+  <Window.Styles>
+    <Style Selector="TextBlock.secondary">
+      <Setter Property="Foreground" Value="{DynamicResource MixerSecondaryText}" />
+    </Style>
+    <Style Selector="Slider /template/ Thumb">
+      <Setter Property="Background" Value="{DynamicResource MixerThumb}" />
+    </Style>
+    <Style Selector="Button.mute">
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="MinHeight" Value="36" />
+    </Style>
+    <Style Selector="Button.mute.muted">
+      <Setter Property="Background" Value="{DynamicResource MixerAccent}" />
+      <Setter Property="Foreground" Value="{DynamicResource MixerAccentText}" />
+    </Style>
+  </Window.Styles>
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Border Padding="24,16" BorderBrush="{DynamicResource MixerStroke}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+        <TextBlock Text="{Binding Title}" FontSize="26" FontWeight="SemiBold" />
+        <TextBlock Grid.Row="1" Text="Your apps. Your sound." Classes="secondary" FontSize="12" TextWrapping="Wrap" />
+        <StackPanel Grid.Column="1" Grid.RowSpan="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <TextBlock Text="{Binding Status}" Classes="secondary" VerticalAlignment="Center" FontSize="12" MaxWidth="140" TextWrapping="Wrap" />
+          <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                    Width="100" AutomationProperties.Name="Color theme" ToolTip.Tip="Color theme" />
+        </StackPanel>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="24,20,24,12">
+      <TextBlock Text="APPLICATION MIXER" Classes="secondary" FontSize="12" FontWeight="SemiBold" LetterSpacing="1.5" />
+      <TextBlock Grid.Column="1" Text="{Binding ApplicationCountLabel}" Classes="secondary" FontSize="12" />
+    </Grid>
+    <Grid Grid.Row="2">
+      <Border IsVisible="{Binding HasNoApplications}" Margin="24,0,24,24" Padding="32"
+              Background="{DynamicResource MixerSurface}" BorderBrush="{DynamicResource MixerStroke}" BorderThickness="1" CornerRadius="10">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="12" MaxWidth="360">
+          <TextBlock Text="Your mixer starts here" FontSize="20" FontWeight="SemiBold" TextAlignment="Center" />
+          <TextBlock Text="{Binding EmptyApplicationsMessage}" Classes="secondary" TextWrapping="Wrap" TextAlignment="Center" />
+        </StackPanel>
+      </Border>
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" IsVisible="{Binding !HasNoApplications}" Padding="24,0,16,16">
+        <ItemsControl ItemsSource="{Binding Applications}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:ApplicationRowViewModel">
+              <Border Width="184" Margin="0,0,12,0" Padding="16" CornerRadius="8"
+                      Background="{DynamicResource MixerSurface}" BorderBrush="{DynamicResource MixerStroke}" BorderThickness="1">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                  <Grid ColumnDefinitions="32,*" Height="44">
+                    <controls:ApplicationIcon Reference="{Binding Icon}" Fallback="{Binding IconFallback}" Width="28" Height="28" />
+                    <TextBlock Grid.Column="1" Text="{Binding DisplayName}" Margin="8,0,0,0" FontSize="14" FontWeight="SemiBold"
+                               VerticalAlignment="Center" MaxLines="2" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding DisplayName}" />
+                  </Grid>
+                  <TextBlock Grid.Row="1" Text="{Binding ActivityLabel}" Classes="secondary" FontSize="12" Margin="0,8,0,0" />
+                  <TextBlock Grid.Row="2" Text="{Binding VolumeLabel}" FontSize="24" FontWeight="SemiBold" Margin="0,12,0,12" HorizontalAlignment="Center" />
+                  <Border Grid.Row="3" Background="{DynamicResource MixerInset}" CornerRadius="6" Padding="12,8">
+                    <Grid ColumnDefinitions="24,*,8" Height="252">
+                      <Canvas Width="24" Height="252">
+                        <TextBlock Canvas.Top="0" Text="100" Classes="secondary" FontSize="10" LineHeight="16" />
+                        <TextBlock Canvas.Top="59" Text="75" Classes="secondary" FontSize="10" LineHeight="16" />
+                        <TextBlock Canvas.Top="118" Text="50" Classes="secondary" FontSize="10" LineHeight="16" />
+                        <TextBlock Canvas.Top="177" Text="25" Classes="secondary" FontSize="10" LineHeight="16" />
+                        <TextBlock Canvas.Top="236" Text="0" Classes="secondary" FontSize="10" LineHeight="16" />
+                      </Canvas>
+                      <controls:ApplicationVolumeSlider Grid.Column="1" Minimum="0" Maximum="100" Orientation="Vertical"
+                              Value="{Binding Volume, Mode=TwoWay}" Foreground="{DynamicResource MixerAccent}"
+                              IsEnabled="{Binding CanControl}" Name="VolumeSlider" Width="68" Height="252"
+                              SmallChange="1" LargeChange="10"
+                              AutomationProperties.Name="{Binding VolumeControlLabel}" AutomationProperties.HelpText="{Binding VolumeDescription}"
+                              ToolTip.Tip="{Binding VolumeDescription}" />
+                    </Grid>
+                  </Border>
+                  <Button Grid.Row="4" Content="{Binding MuteLabel}" Command="{Binding ToggleMuteCommand}" Classes="mute" Classes.muted="{Binding IsMuted}"
+                          IsEnabled="{Binding CanControl}" Margin="0,16,0,0" HorizontalAlignment="Stretch"
+                          AutomationProperties.Name="{Binding MuteControlLabel}" />
+                  <TextBlock Grid.Row="5" Text="{Binding CommandError}" IsVisible="{Binding HasCommandError}" Margin="0,8,0,0" TextWrapping="Wrap" FontSize="12" />
                 </Grid>
-                <controls:ApplicationVolumeSlider Minimum="0" Maximum="100" Value="{Binding Volume, Mode=TwoWay}"
-                        IsEnabled="{Binding CanControl}" Name="VolumeSlider"
-                        AutomationProperties.Name="{Binding VolumeControlLabel}"
-                        AutomationProperties.HelpText="{Binding VolumeDescription}"
-                        ToolTip.Tip="{Binding VolumeDescription}" />
-                <Grid ColumnDefinitions="Auto,*">
-                  <Button Content="{Binding MuteLabel}" Command="{Binding ToggleMuteCommand}"
-                        IsEnabled="{Binding CanControl}" HorizontalAlignment="Left"
-                        AutomationProperties.Name="{Binding MuteControlLabel}" />
-                  <TextBlock Grid.Column="1" Text="{Binding ActivityLabel}" HorizontalAlignment="Right"
-                             VerticalAlignment="Center" FontSize="12" Opacity="0.7" />
-                </Grid>
-                <TextBlock Text="{Binding CommandError}" IsVisible="{Binding HasCommandError}"
-                           TextWrapping="Wrap" FontSize="12" />
-              </StackPanel>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </StackPanel>
-  </ScrollViewer>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Grid>
+    <Border Grid.Row="3" Padding="24,12" BorderBrush="{DynamicResource MixerStroke}" BorderThickness="0,1,0,0">
+      <TextBlock Text="{Binding EmptyOutputMessage}" Classes="secondary" FontSize="12" />
+    </Border>
+  </Grid>
 </Window>

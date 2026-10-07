@@ -12,16 +12,20 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly Dictionary<ApplicationId, ApplicationRowViewModel> _rows = [];
     private readonly Func<ApplicationId, float, ValueTask>? _setVolume;
     private readonly Func<ApplicationId, bool, ValueTask>? _setMute;
+    private readonly Action<ThemePreference>? _setTheme;
+    private ThemePreference _selectedTheme;
     private string _status = UiStrings.ConnectingMessage;
     private bool _backendAvailable;
     private MixerSnapshot _latestSnapshot = MixerSnapshot.Empty;
 
     public MainWindowViewModel(
         Func<ApplicationId, float, ValueTask>? setVolume = null,
-        Func<ApplicationId, bool, ValueTask>? setMute = null)
+        Func<ApplicationId, bool, ValueTask>? setMute = null,
+        Action<ThemePreference>? setTheme = null)
     {
         _setVolume = setVolume;
         _setMute = setMute;
+        _setTheme = setTheme;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -34,6 +38,19 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         : UiStrings.UnavailableApplicationsMessage;
     public ObservableCollection<ApplicationRowViewModel> Applications { get; } = [];
     public bool HasNoApplications => Applications.Count == 0;
+    public string ApplicationCountLabel => Applications.Count == 1 ? "1 application" : $"{Applications.Count} applications";
+    public IReadOnlyList<ThemePreference> Themes { get; } = Enum.GetValues<ThemePreference>();
+    public ThemePreference SelectedTheme
+    {
+        get => _selectedTheme;
+        set
+        {
+            if (!Enum.IsDefined(value) || _selectedTheme == value) return;
+            _selectedTheme = value;
+            OnPropertyChanged();
+            _setTheme?.Invoke(value);
+        }
+    }
     public string Status
     {
         get => _status;
@@ -109,6 +126,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             else Applications.Insert(index, row);
         }
         OnPropertyChanged(nameof(HasNoApplications));
+        OnPropertyChanged(nameof(ApplicationCountLabel));
     }
 
     private ValueTask SendVolumeAsync(ApplicationId id, float value) => _setVolume?.Invoke(id, value) ?? ValueTask.CompletedTask;
